@@ -70,6 +70,10 @@ function init() {
       'use a non-standard version of react-scripts'
     )
     .option(
+      '--npm-alias <npm-alias>',
+      'npm alias'
+    )
+    .option(
       '--template <path-to-template>',
       'specify a template for the created project'
     )
@@ -233,13 +237,14 @@ function init() {
           program.scriptsVersion,
           program.template,
           useYarn,
-          program.usePnp
+          program.usePnp,
+          program.npm
         );
       }
     });
 }
 
-function createApp(name, verbose, version, template, useYarn, usePnp) {
+function createApp(name, verbose, version, template, useYarn, usePnp,npm) {
   const unsupportedNodeVersion = !semver.satisfies(
     // Coerce strings with metadata (i.e. `15.0.0-nightly`).
     semver.coerce(process.version),
@@ -333,11 +338,12 @@ function createApp(name, verbose, version, template, useYarn, usePnp) {
     originalDirectory,
     template,
     useYarn,
-    usePnp
+    usePnp,
+    npm
   );
 }
 
-function install(root, useYarn, usePnp, dependencies, verbose, isOnline) {
+function install(root, useYarn, usePnp,npm, dependencies, verbose, isOnline) {
   return new Promise((resolve, reject) => {
     let command;
     let args;
@@ -366,7 +372,7 @@ function install(root, useYarn, usePnp, dependencies, verbose, isOnline) {
         console.log();
       }
     } else {
-      command = 'npm';
+      command = npm || 'npm';
       args = [
         'install',
         '--no-audit', // https://github.com/facebook/create-react-app/issues/11174
@@ -408,7 +414,8 @@ function run(
   originalDirectory,
   template,
   useYarn,
-  usePnp
+  usePnp,
+  npm
 ) {
   Promise.all([
     getInstallPackage(version, originalDirectory),
@@ -469,6 +476,7 @@ function run(
           root,
           useYarn,
           usePnp,
+          npm,
           allDependencies,
           verbose,
           isOnline
